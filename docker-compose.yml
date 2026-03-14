@@ -1,0 +1,45 @@
+version: '3.9'
+
+services:
+  # ─── PostgreSQL 15 (self-hosted, no managed service) ─────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: coreinventory_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: coreinventory_user
+      POSTGRES_PASSWORD: coreinventory_pass
+      POSTGRES_DB: coreinventory_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U coreinventory_user -d coreinventory_db']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ─── Next.js App ─────────────────────────────────────────────
+  app:
+    build: .
+    container_name: coreinventory_app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://coreinventory_user:coreinventory_pass@postgres:5432/coreinventory_db
+      JWT_SECRET: please_change_this_to_a_strong_secret_minimum_32_chars
+      JWT_EXPIRES_IN: 7d
+      SMTP_HOST: localhost
+      SMTP_PORT: 587
+      SMTP_SECURE: 'false'
+      NODE_ENV: production
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    ports:
+      - '3000:3000'
+    command: sh -c "node scripts/migrate.js && npm start"
+
+volumes:
+  pgdata:
