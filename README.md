@@ -89,7 +89,7 @@ coreinventory/
 
 ## 📹 Demo Video
 
-[▶️ Watch Demo](YOUR_VIDEO_LINK_HERE)
+[▶️ Watch Demo] : https://youtu.be/Xe4l-RYbuBc?si=TIzXog1RVZ2_4lG9 
 
 ---
 
